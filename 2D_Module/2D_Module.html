@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(100, 8px);
+            grid-template-rows: repeat(100, 8px);
+            gap: 1px;
+            background-color: black;
+        }
+
+        .cell {
+            background-color: green;
+        }
+
+        .cell.on-fire {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="grid"></div>
+    <br>
+    <button onclick="startSimulation()">开始</button>
+    <button onclick="increaseDensity()">增加密度</button>
+    <button onclick="decreaseDensity()">减少密度</button>
+
+    <script src="2D_Module.js"></script>
+</body>
+</html>
