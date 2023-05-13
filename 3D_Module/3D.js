@@ -1,41 +1,28 @@
 import * as THREE from 'three';
-let scene, camera, renderer;
-        const groundWidth = 1000;
-        const groundLength = 1000;
-        const groundHeight = 400;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-        init();
-        // animate();
-        render();
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild(renderer.domElement);
+renderer.setClearColor(0xffffff);
 
-        function init() {
-            // 创建场景
-            scene = new THREE.Scene();
-            // scene.background = new THREE.Color(0xffffff);
+const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+const material = new THREE.MeshBasicMaterial({
+    color: 0xafd6fc,
+});
+const cube = new THREE.Mesh( geometry, material );
+scene.add( cube );
 
-            // 创建相机
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-            camera.position.set(300, 990, 800);
-            camera.lookAt(0, 0, 0);
+camera.position.z = 5;
 
-            // 创建地皮
-            const groundGeometry = new THREE.BoxGeometry(groundWidth, groundHeight, groundLength);
-            const groundMaterial = new THREE.MeshBasicMaterial(
-                {
-                    color: 0xafcef3,
-                    // 前面FrontSide  背面：BackSide 双面：DoubleSide
-                    side:THREE.FrontSide,
-                }
-            );
-            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-            scene.add(ground);
+function animate() {
+	requestAnimationFrame( animate );
 
-            // 创建渲染器
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-            renderer.setClearColor(0xffffff);
-        }
-        function render() {
-            renderer.render(scene, camera); // 将场景渲染到界面
-        }
+	cube.rotation.x += 0.01;
+	cube.rotation.y += 0.01;
+
+	renderer.render( scene, camera );
+}
+
+animate();
