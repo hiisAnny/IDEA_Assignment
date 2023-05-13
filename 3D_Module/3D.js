@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 let scene, camera, renderer;
         const groundWidth = 1000;
         const groundLength = 1000;
@@ -19,9 +20,16 @@ let scene, camera, renderer;
 
             // 创建地皮
             const groundGeometry = new THREE.BoxGeometry(groundWidth, groundHeight, groundLength);
-            const groundMaterial = new THREE.MeshBasicMaterial({ color: 0xafcef3 });
+            const groundMaterial = new THREE.MeshBasicMaterial(
+                {
+                    color: 0xafcef3,
+                    // 前面FrontSide  背面：BackSide 双面：DoubleSide
+                    side:THREE.FrontSide,
+                }
+            );
             const ground = new THREE.Mesh(groundGeometry, groundMaterial);
             scene.add(ground);
+
             // 创建渲染器
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
