@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>three.js webgl - interactive - voxel painter</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!-- <link type="text/css" rel="stylesheet" href="forest.css"> -->
+    <style>
+        body {
+            background-color: #f0f0f0;
+            color: #444;
+        }
+
+        a {
+            color: #08f;
+        }
+    </style>
+</head>
+
+<body>
+  <button id="startButton">开始</button>
+
+    <button id="increaseDensity">增加密度</button>
+    <button id="decreaseDensity">减少密度</button>
+    <div id="forest"> </div>
+
+    
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@v0.152.2/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@v0.152.2/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="forest.js"></script>
+    <script type="module" src="interaction.js"></script>
+</body>
+
+</html>
