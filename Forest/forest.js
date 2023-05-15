@@ -17,8 +17,10 @@ let gridHelper,controls;
 const objects = [];
 let density = [];
 
+  
 init();
 render();
+
 export { scene, objects, density };
     
 function init() {
@@ -44,9 +46,9 @@ function init() {
     cubeGeo = new THREE.BoxGeometry(50, 50, 50);
     cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xfeb74c, map: map });
 
-    // 网格辅助
+    // grid
     gridHelper = new THREE.GridHelper(1000, 20);
-    gridHelper.material.color.set(0xffffff); 
+    gridHelper.material.color.set(0xff0000); // 设置网格颜色为红色
     scene.add(gridHelper);
 
     raycaster = new THREE.Raycaster();
@@ -62,21 +64,22 @@ function init() {
 
     // 创建网格背景
     const backgroundGeometry = new THREE.PlaneGeometry(1000, 1000);
-    const backgroundMaterial = new THREE.MeshBasicMaterial({ color: 0xf0f9ff });
+    const backgroundMaterial = new THREE.MeshStandardMaterial({ color: 0xffede9 });
     const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
     backgroundGeometry.rotateX(- Math.PI / 2);
     backgroundPlane.position.set(0, -1, 0); // 将背景平面设置在网格的后面
     scene.add(backgroundPlane);
 
-    fire = new THREE.PointLight(0xff0000, 8, 100);
-    fire.add(new THREE.Mesh(new THREE.SphereGeometry(10, 16, 8), new THREE.MeshBasicMaterial({ color: 0xff0000 })));
+    fire = new THREE.PointLight(0xff0000, 1, 100);
+    fire.add(new THREE.Mesh(new THREE.SphereGeometry(15, 12, 2), new THREE.MeshBasicMaterial({ color: 0xff0000 })));
     fire.position.set(20, 50, 0);
     scene.add(fire);
+
 
     const range = fire.distance;
     console.log("火光的范围哦：", range); // 输出点光源的范围值
     const fireAreaGeometry = new THREE.PlaneGeometry(range, range);
-    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8 });
+    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8,visible:true  });
     const fireArea = new THREE.Mesh(fireAreaGeometry, fireAreaMaterial);
     fireArea.rotateX(- Math.PI / 2);
     scene.add(fireArea);
@@ -84,7 +87,7 @@ function init() {
     console.log("被点着的有：", fireAreas);
 
     // 环境光
-    const ambientLight = new THREE.AmbientLight(0xffffff);
+    const ambientLight = new THREE.AmbientLight(0x606060);
     scene.add(ambientLight);
 
     // 定向光源
@@ -215,8 +218,18 @@ function onDocumentKeyUp(event) {
 
 }
 
+// 更新函数，用于每一帧更新小球的旋转
+function updateRotation() {
+    // 每一帧更新小球的旋转角度
+    fire.rotation.x += 0.05; // 绕X轴旋转
+    fire.rotation.y += 0.01; // 绕Y轴旋转
+}
+  
 export function render() {
-
+    updateRotation();
+  
+    // 每隔一定时间调用一次更新函数，实现小球的旋转
+    setInterval(updateRotation, 100); // 1000毫秒，即1秒
     controls.update();
     // const time = Date.now() * 0.0005;
     // const planePosition = plane.getWorldPosition(new THREE.Vector3()); // 获取正方体的全局位置
@@ -230,7 +243,7 @@ export function render() {
     // fire.position.z = THREE.MathUtils.clamp(z, planePosition.z - planeHalfSize, planePosition.z + planeHalfSize);
     // fire.position.y = planePosition.y + planeHalfSize  +10; // 在正方体顶部偏移
     renderer.render(scene, camera);
-
+    
 }
 
 export function addRandomCube() {
