@@ -8,21 +8,23 @@ let pointer, raycaster, isShiftDown = false;
 //立方体们
 let rollOverMesh, rollOverMaterial;
 let cubeGeo, cubeMaterial;
+
 let fire;
 const fireAreas = [];
 
-let gridHelper,controls;
+let gridHelper, controls;
 
 //需要进行射线相交检测的对象
 const objects = [];
 let density = [];
 
-  
+
+
 init();
 render();
 
 export { scene, objects, density };
-    
+
 function init() {
     const forest = document.getElementById("forest");
 
@@ -37,7 +39,7 @@ function init() {
     const rollOverGeo = new THREE.BoxGeometry(50, 50, 50);
     rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xb7ffb7, opacity: 0.5, transparent: true });
     rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
-    rollOverMesh.position.set(0,20,0);
+    rollOverMesh.position.set(0, 20, 0);
     scene.add(rollOverMesh);
 
     // cubes
@@ -79,7 +81,7 @@ function init() {
     const range = fire.distance;
     console.log("火光的范围哦：", range); // 输出点光源的范围值
     const fireAreaGeometry = new THREE.PlaneGeometry(range, range);
-    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8,visible:true  });
+    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8, visible: true });
     const fireArea = new THREE.Mesh(fireAreaGeometry, fireAreaMaterial);
     fireArea.rotateX(- Math.PI / 2);
     scene.add(fireArea);
@@ -105,7 +107,7 @@ function init() {
     document.addEventListener('keydown', onDocumentKeyDown);
     document.addEventListener('keyup', onDocumentKeyUp);
     controls = new OrbitControls(camera, renderer.domElement);
-    
+
     window.addEventListener('resize', onWindowResize);
 
 }
@@ -183,7 +185,7 @@ function onPointerDown(event) {
                 scene.remove(intersect.object);
                 objects.splice(objects.indexOf(intersect.object), 1);
             }
-        } 
+        }
         // create cube
         else {
             const voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
@@ -192,8 +194,9 @@ function onPointerDown(event) {
             scene.add(voxel);
 
             objects.push(voxel);
+            density.push(voxel);
         }
-        
+
         render();
     }
 }
@@ -223,41 +226,81 @@ function updateRotation() {
     // 每一帧更新小球的旋转角度
     fire.rotation.x += 0.05; // 绕X轴旋转
     fire.rotation.y += 0.01; // 绕Y轴旋转
-}
-  
-export function render() {
-    updateRotation();
-  
-    // 每隔一定时间调用一次更新函数，实现小球的旋转
     setInterval(updateRotation, 100); // 1000毫秒，即1秒
+}
+
+// 判断立方体是否在火焰范围内
+function isTreeInFireArea(fireArea, tree) {
+    // 获取平面的边界框或包围盒
+    const boundingBox = new THREE.Box3().setFromObject(fireArea);
+
+    // 获取最小点和最大点的坐标
+    const minPoint = boundingBox.min;
+    const maxPoint = boundingBox.max;
+
+    // // 输出平面的范围
+    // console.log('平面的范围：');
+    // console.log('最小点坐标：', minPoint);
+    // console.log('最大点坐标：', maxPoint);
+
+    const boundingBox2 = new THREE.Box3().setFromObject(tree);
+    // 获取最小点和最大点的坐标
+    const minPoint2 = boundingBox2.min;
+    const maxPoint2 = boundingBox2.max;
+
+    // // 输出平面的范围
+    // console.log('树的范围：');
+    // console.log('最小点坐标：', minPoint2);
+    //     console.log('最大点坐标：', maxPoint2);
+
+    // 判断立方体的边界框是否与平面的范围相交
+    const isCubeAbovePlane =
+        minPoint2.x <= maxPoint.x &&
+        maxPoint2.x >= minPoint.x &&
+        minPoint2.y <= maxPoint.y &&
+        maxPoint2.y >= minPoint.y &&
+        minPoint2.z <= maxPoint.z &&
+        maxPoint2.z >= minPoint.z;
+    console.log('立方体是否在平面的上方：', isCubeAbovePlane);
+    if (isCubeAbovePlane) {
+        const index = objects.indexOf(tree);
+        if (index != -1) {
+            scene.remove(tree);
+            objects.splice(index, 1);
+        }
+    }
+}
+
+export function render() {
+    if (density.length > 0) {
+        // 遍历 objects 数组，对每个立方体进行判断
+        fireAreas.forEach(fireArea => {
+            density.forEach(tree => {
+                isTreeInFireArea(fireArea, tree)
+            });
+        });
+    }
+
+    // 遍历 objects 数组，对每个立方体进行判断
+
+    updateRotation();
     controls.update();
-    // const time = Date.now() * 0.0005;
-    // const planePosition = plane.getWorldPosition(new THREE.Vector3()); // 获取正方体的全局位置
-    // // 获取正方体对象的边界坐标
-    // const planeHalfSize = 1000 / 2;
-
-    // let x = planePosition.x + Math.sin(time * 0.7) * 30; // 在 x 轴上进行偏移
-    // let z = planePosition.z + Math.cos(time * 0.3) * 30; // 在 z 轴上进行偏移
-
-    // fire.position.x = THREE.MathUtils.clamp(x, planePosition.x - planeHalfSize, planePosition.x + planeHalfSize);
-    // fire.position.z = THREE.MathUtils.clamp(z, planePosition.z - planeHalfSize, planePosition.z + planeHalfSize);
-    // fire.position.y = planePosition.y + planeHalfSize  +10; // 在正方体顶部偏移
     renderer.render(scene, camera);
-    
+
 }
 
 export function addRandomCube() {
     //   console.log('Position:', plane.position);
-//   console.log('Scale:', plane.scale);
-    const positionX = randomPosition(-425,425);
-const positionY = 20;// 平面所在的高度
-    const positionZ = randomPosition(-425,425); 
-    
+    //   console.log('Scale:', plane.scale);
+    const positionX = randomPosition(-425, 425);
+    const positionY = 20;// 平面所在的高度
+    const positionZ = randomPosition(-425, 425);
+
     const newGeo = new THREE.BoxGeometry(50, 50, 50);
     const newCube = new THREE.Mesh(newGeo, cubeMaterial);
-    newCube.position.set(positionX,positionY,positionZ);
+    newCube.position.set(positionX, positionY, positionZ);
 
-  // 将立方体添加到场景中
+    // 将立方体添加到场景中
     scene.add(newCube);
     objects.push(newCube);
     density.push(newCube);
