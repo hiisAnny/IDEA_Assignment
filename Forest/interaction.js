@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { scene, objects, density, cubeGeo, cubeMaterial } from './forest.js';
-import { render, pushWrapper} from './forest.js';
+import { render, pushWrapper } from './forest.js';
 
-let fire,fireRadius;
+let fire, fireRadius, isOnFire;
 const fireAreas = [];
+let backsoonTree = [];
 
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', startSimulation);
@@ -15,19 +16,19 @@ const decreaseButton = document.getElementById('decreaseDensity');
 decreaseButton.addEventListener('click', decreaseDensity);
 
 
-export { fireAreas };
-    
+export {  isOnFire };
+
 function startSimulation() {
-    const onFire = scene.getObjectByName("onFire");
-    if (onFire) {
-        updateFire();
+    if (!scene.getObjectByName("forestFire")) {
+        createFire();
+        isOnFire = scene.getObjectByName("forestFire");
+        showFireAreas();
     }
     else {
-        createFire();
+        updateFirePosition();
     }
-    showFireAreas();
-    checkFire();
-    render();
+    // checkFire();  
+
 }
 
 function increaseDensity() {
@@ -78,74 +79,126 @@ function createFire() {
     fire.add(new THREE.Mesh(new THREE.SphereGeometry(16, 12, 2, 0, Math.PI * 2, 0, 3.65681384877852),
         new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true })));
     fire.position.set(0, 50, 0);
-    fire.name = "onFire";
+    fire.name = "forestFire";
     scene.add(fire);
+
 }
 
 function showFireAreas() {
+    if (scene.getObjectByName("burning")) {
+        scene.remove(scene.getObjectByName("burning"));
+        
+    }
     // 将角度转换为弧度
     var angleInRadians = 30 * Math.PI / 180;
     fireRadius = (fire.distance * 0.7) * Math.cos(angleInRadians);
     const fireAreaGeometry = new THREE.CircleGeometry(fireRadius, 32);
-    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8,opacity: 0.5, transparent: true, visible: true });
+    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8, opacity: 0.5, transparent: true, visible: true });
     const fireArea = new THREE.Mesh(fireAreaGeometry, fireAreaMaterial);
     fireArea.rotateX(- Math.PI / 2);
-
-    fireArea.name = "burning";
-    if (scene.getObjectByName("burning")) {
-        scene.remove(scene.getObjectByName("burning"));
-    }
     fireArea.position.x = fire.position.x;
     fireArea.position.z = fire.position.z;
+    fireArea.name = "burning";
     scene.add(fireArea);
+    if (fireAreas.length > 0) {
+      const what = fireAreas.pop();
+    console.log("不要火：", what);      
+    }
+
     pushWrapper(fireAreas, fireArea);
-    
-    
-    
+    render();
     // fireAreas.push(fireArea);
-
-    // console.log("火光的范围：", fireArea.position); // 输出点光源的范围值
-    console.log("被点着的fireAreas有：", fireAreas);
-
-
+    checkFire();
+    checkBacksoonTree();
+    
 }
 
 // 更新函数，用于每一帧更新小球的旋转
-function updateFire() {
-    requestAnimationFrame(render);
-    // 每一帧更新小球的旋转角度
-    // fire.rotation.x += 0.05; // 绕X轴旋转
-    // fire.rotation.y += 0.01; // 绕Y轴旋转
-    // setInterval(updateRotation, 100); // 1000毫秒，即1秒
-    console.log("旧的：", fire.position);
-    const time = Date.now() * 0.0005;
+export function updateFire() {
+
+    const time = Date.now() * 0.000005;
 
     const x = fire.position.x + Math.sin(time * 0.7) * 30; // 在 x 轴上进行偏移
-    const fireX = THREE.MathUtils.clamp(x, -492, 492);
+    const fireX = THREE.MathUtils.clamp(x, -500 + fireRadius, 500 - fireRadius);
 
-    const z = fire.position.z + Math.cos(time * 0.3) * 30; // 在 z 轴上进行偏移
-    const fireZ = THREE.MathUtils.clamp(z, -492, 492);
+    const z = fire.position.z + Math.cos(time * 0.8) * 30; // 在 z 轴上进行偏移
+    const fireZ = THREE.MathUtils.clamp(z, -500 + fireRadius, 500 - fireRadius);
 
     fire.position.set(fireX, fire.position.y, fireZ);
-    console.log("新的：", fire.position, "距离：", fire.distance);
+    showFireAreas();
+    // console.log("新的：", fire.position, "距离：", fire.distance);
+
+}
+
+export function updateFirePosition() {
+
+    const x = randomPosition(-500 + fireRadius, 500 - fireRadius);
+    const z = randomPosition(-500 + fireRadius, 500 - fireRadius);
+    fire.position.set(x, fire.position.y, z);
+    showFireAreas();
 }
 
 export function checkFire() {
-    console.log("check了");
+
     if (density.length > 0 && fireAreas.length > 0) {
         // 遍历每个平面，对每个立方体进行判断
         fireAreas.forEach(fireArea => {
-            console.log("查找的这片着火区域坐标：",fireArea.position);
+            // console.log("查找的这片着火区域坐标：",fireArea.position);
             density.forEach(tree => {
-                console.log("查找的这颗树坐标：", tree.position);
-                isTreeInFireAreas(fireArea, tree);
+                // console.log("查找的这颗树坐标：", tree.position);
+                const treeAlive = isTreeAlive(fireArea, tree);
+                if (!treeAlive) {
+                    const index = objects.indexOf(tree);
+                    if (index != -1) {
+                        backsoonTree.push(objects[index]);
+                        console.log("暂时死亡：", backsoonTree);
+
+                        objects.splice(index, 1);
+                        density.splice(density.indexOf(tree), 1);
+
+                        scene.remove(tree);
+                        render();
+                    }
+                }
             });
+
         });
     }
-}
 
+}
+function checkBacksoonTree() {
+    if (fireAreas.length > 0 && backsoonTree.length > 0) {
+    const elementsToRemove = [];
+
+    backsoonTree.forEach(revivedTree => {
+        const treeAlive = isTreeAlive(fireAreas[0], revivedTree);
+    
+        if (treeAlive) {
+            const index = objects.indexOf(revivedTree);
+            if (index === -1) {
+                objects.push(revivedTree);
+                pushWrapper(density, revivedTree);
+                scene.add(revivedTree);
+                elementsToRemove.push(revivedTree);
+            }
+            console.log("新长出来啦！");
+        } 
+        render();
+    });
+    
+    // 移除需要移除的元素
+    elementsToRemove.forEach(element => {
+        const index = backsoonTree.indexOf(element);
+        if (index !== -1) {
+            backsoonTree.splice(index, 1);
+        }
+    });
+    
+
+    }
+}
 // 判断树是否在火焰范围内
-function isTreeInFireAreas(fireArea, tree) {
+function isTreeAlive(fireArea, tree) {
 
     const fireAreaBounds = {
         FMinX: fireArea.position.x - fireRadius,
@@ -153,7 +206,7 @@ function isTreeInFireAreas(fireArea, tree) {
         FMinZ: fireArea.position.z - fireRadius,
         FMaxZ: fireArea.position.z + fireRadius
     };
-    
+    // console.log("1---------",fireAreaBounds);
     const boundingTree = new THREE.Box3().setFromObject(tree);
 
     const treeBounds = {
@@ -162,27 +215,14 @@ function isTreeInFireAreas(fireArea, tree) {
         TMinZ: boundingTree.min.z,
         TMaxZ: boundingTree.max.z
     }
-    // console.log("着火区域：", fireAreaBounds);
-    // console.log("树的区域：", treeBounds);
-    // console.log('树的范围：');
-    // console.log('最小点坐标：', boundingTree.min);
-    // console.log('最大点坐标：', boundingTree.max);
+    // console.log("2",treeBounds);
 
     // 判断树的边界框是否与平面圆的范围相交：左右上下
     const isTree_outOfArea =
-        (treeBounds.TMaxX < fireAreaBounds.FMinX) 
+        (treeBounds.TMaxX < fireAreaBounds.FMinX)
         || (treeBounds.TMinX > fireAreaBounds.FMaxX)
         || (treeBounds.TMaxZ < fireAreaBounds.FMinZ)
         || (treeBounds.TMinZ > fireAreaBounds.FMaxZ);
     // console.log('这颗树没在火焰燃烧范围内：', isTree_outOfArea);
-    if (!isTree_outOfArea) {
-        const index = objects.indexOf(tree);
-        if (index != -1) {
-            objects.splice(index, 1);
-            density.splice(density.indexOf(tree), 1);
-            scene.remove(tree);
-        }
-    }
-    render();
+    return isTree_outOfArea; //true 活着，false 死了
 }
-

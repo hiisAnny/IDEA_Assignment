@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { fireAreas, checkFire } from './interaction.js';
+import {  isOnFire, checkFire, updateFire, updateFirePosition } from './interaction.js';
 
 let camera, scene, renderer;
 let plane;
@@ -17,6 +17,7 @@ let density = [];
 
 //检测火源和树木的新增
 const newElement_toArray = new Event('newElement_toArray');
+
 const pushWrapper = (arr, element) => {
     arr.push(element);
     document.dispatchEvent(newElement_toArray);
@@ -24,6 +25,7 @@ const pushWrapper = (arr, element) => {
 
 init();
 render();
+
 
 export { scene, objects, density, cubeGeo, cubeMaterial, pushWrapper};
 
@@ -35,7 +37,7 @@ function init() {
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf5e8e8);
+    scene.background = new THREE.Color(0xe6fafc);
 
     // 悬浮的树
     const rollOverGeo = new THREE.BoxGeometry(50, 50, 50);
@@ -52,7 +54,7 @@ function init() {
 
     // grid
     gridHelper = new THREE.GridHelper(1000, 20);
-    gridHelper.material.color.set(0xff0000); // 设置网格颜色为红色
+    gridHelper.material.color.set(0xe6fafc); 
     scene.add(gridHelper);
 
     raycaster = new THREE.Raycaster();
@@ -67,8 +69,8 @@ function init() {
     objects.push(plane);
 
     // 创建网格背景
-    const backgroundGeometry = new THREE.PlaneGeometry(1000, 1000);
-    const backgroundMaterial = new THREE.MeshStandardMaterial({ color: 0xffede9 });
+    const backgroundGeometry = new THREE.PlaneGeometry(1500, 2000);
+    const backgroundMaterial = new THREE.MeshStandardMaterial({ color: 0xfff2f2 });
     const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
     backgroundGeometry.rotateX(- Math.PI / 2);
     backgroundPlane.position.set(0, -1, 0); // 将背景平面设置在网格的后面
@@ -92,18 +94,24 @@ function init() {
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('keydown', onDocumentKeyDown);
     document.addEventListener('keyup', onDocumentKeyUp);
+    document.addEventListener('blur', no_one_is_planting_A_Tree);
 
+    //新的树进density了
     document.addEventListener('newElement_toArray', () => {
-        console.log('Element pushed to myArray!');
+        // console.log('Element pushed to myArray!');
         checkFire();
-        render();
-      });
+    });
+    
     // controls = new OrbitControls(camera, renderer.domElement);
 
     window.addEventListener('resize', onWindowResize);
 
 }
-
+function no_one_is_planting_A_Tree() {
+    if (isOnFire) {
+        updateFirePosition();
+    }
+}
 function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -217,10 +225,20 @@ function onDocumentKeyUp(event) {
 export function render() {
     // 遍历 objects 数组，对每个立方体进行判断
     // controls.update();
-    console.log("render了");
+    requestAnimationFrame(render);
+    // if (isOnFire) {requestAnimationFrame(updateFire);
+        // updateFire();
+            // updateFirePosition(); 
+            
+
+//  updateFirePosition();
+
+        // console.log("fdsfdsfsdfsd")
+       
+        // requestAnimationFrame(render);
+    // }
+    
+
     renderer.render(scene, camera);
 }
-
-
-
 
