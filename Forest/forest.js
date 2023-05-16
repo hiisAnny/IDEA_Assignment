@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { fireAreas, checkFire } from './interaction.js';
 
 let camera, scene, renderer;
 let plane;
@@ -8,23 +9,29 @@ let pointer, raycaster, isShiftDown = false;
 //立方体们
 let rollOverMesh, rollOverMaterial;
 let cubeGeo, cubeMaterial;
-
 let gridHelper, controls;
 
 //需要进行射线相交检测的对象
 const objects = [];
 let density = [];
 
+//检测火源和树木的新增
+const newElement_toArray = new Event('newElement_toArray');
+const pushWrapper = (arr, element) => {
+    arr.push(element);
+    document.dispatchEvent(newElement_toArray);
+};
+
 init();
 render();
 
-export { scene, objects, density, cubeGeo, cubeMaterial };
+export { scene, objects, density, cubeGeo, cubeMaterial, pushWrapper};
 
 function init() {
     const forest = document.getElementById("forest");
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set(500, 800, 1300);
+    camera.position.set(500, 1800, 1000);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
@@ -85,7 +92,13 @@ function init() {
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('keydown', onDocumentKeyDown);
     document.addEventListener('keyup', onDocumentKeyUp);
-    controls = new OrbitControls(camera, renderer.domElement);
+
+    document.addEventListener('newElement_toArray', () => {
+        console.log('Element pushed to myArray!');
+        checkFire();
+        render();
+      });
+    // controls = new OrbitControls(camera, renderer.domElement);
 
     window.addEventListener('resize', onWindowResize);
 
@@ -173,7 +186,7 @@ function onPointerDown(event) {
             scene.add(voxel);
 
             objects.push(voxel);
-            density.push(voxel);
+            pushWrapper(density, voxel);
         }
 
         render();
@@ -200,9 +213,11 @@ function onDocumentKeyUp(event) {
 
 }
 
+
 export function render() {
     // 遍历 objects 数组，对每个立方体进行判断
-    controls.update();
+    // controls.update();
+    console.log("render了");
     renderer.render(scene, camera);
 }
 
