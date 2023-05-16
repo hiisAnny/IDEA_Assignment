@@ -31,11 +31,11 @@ function init() {
     const forest = document.getElementById("forest");
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set(500, 1800, 1000);
+    camera.position.set(300, 600, 1200);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = new THREE.Color(0xf5e8e8);
 
     // 悬浮的树
     const rollOverGeo = new THREE.BoxGeometry(50, 50, 50);

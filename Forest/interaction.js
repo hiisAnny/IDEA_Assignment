@@ -18,7 +18,8 @@ decreaseButton.addEventListener('click', decreaseDensity);
 export { fireAreas };
     
 function startSimulation() {
-    if (checkScene()) {
+    const onFire = scene.getObjectByName("onFire");
+    if (onFire) {
         updateFire();
     }
     else {
@@ -47,25 +48,6 @@ function decreaseDensity() {
     }
 }
 
-function checkScene() {
-    const target = 'PointLight';
-
-    let isTargetFound = false;
-    scene.children.forEach(object => {
-        if (object.type === target) {
-            isTargetFound = true;
-            // 找到了目标对象
-            console.log(object, ' -- 找到了目标对象');
-            return true; // 终止循环
-        }
-    });
-
-    if (!isTargetFound) {
-        // 没有找到目标对象
-        console.log('没有找到目标对象');
-        return false; // 终止循环
-    }
-}
 
 function randomPosition(min, max) {
     return Math.random() * (max - min) + min
@@ -93,8 +75,10 @@ function addRandomTree() {
  */
 function createFire() {
     fire = new THREE.PointLight(0xff0000, 2, 100);
-    fire.add(new THREE.Mesh(new THREE.SphereGeometry(16, 12, 2,0, Math.PI * 2,0,3.65681384877852), new THREE.MeshBasicMaterial({ color: 0xff0000 })));
+    fire.add(new THREE.Mesh(new THREE.SphereGeometry(16, 12, 2, 0, Math.PI * 2, 0, 3.65681384877852),
+        new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true })));
     fire.position.set(0, 50, 0);
+    fire.name = "onFire";
     scene.add(fire);
 }
 
@@ -103,12 +87,21 @@ function showFireAreas() {
     var angleInRadians = 30 * Math.PI / 180;
     fireRadius = (fire.distance * 0.7) * Math.cos(angleInRadians);
     const fireAreaGeometry = new THREE.CircleGeometry(fireRadius, 32);
-    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8, visible: true });
+    const fireAreaMaterial = new THREE.MeshStandardMaterial({ color: 0xffa8a8,opacity: 0.5, transparent: true, visible: true });
     const fireArea = new THREE.Mesh(fireAreaGeometry, fireAreaMaterial);
     fireArea.rotateX(- Math.PI / 2);
-    // fireArea.position.copy(fire.position);
+
+    fireArea.name = "burning";
+    if (scene.getObjectByName("burning")) {
+        scene.remove(scene.getObjectByName("burning"));
+    }
+    fireArea.position.x = fire.position.x;
+    fireArea.position.z = fire.position.z;
     scene.add(fireArea);
     pushWrapper(fireAreas, fireArea);
+    
+    
+    
     // fireAreas.push(fireArea);
 
     // console.log("火光的范围：", fireArea.position); // 输出点光源的范围值
