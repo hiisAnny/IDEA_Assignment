@@ -15,9 +15,10 @@ const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    5000
 );
-camera.position.set(0, 10, 500);
+camera.position.set(0, 0, 100);
+camera.rotation.x = Math.PI / 2;
 
 // 创建一个球体，设置它投射阴影
 const sphereGeometry = new THREE.SphereGeometry(5, 32, 32);
@@ -27,24 +28,28 @@ sphere.position.set(50,0,10);
 sphere.castShadow = true;
 
 // 创建一个平面，设置它接收阴影
-const planeGeometry = new THREE.PlaneGeometry(200, 200, 32, 32);
+const planeGeometry = new THREE.PlaneGeometry(400, 400);
 const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x3c8726 });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.position.set(0,0, 0);
+// plane.rotation.x = Math.PI / 2;
+
 plane.receiveShadow = true;
 
 // 创建光源，并设置阴影相关属性
 const light = new THREE.PointLight(0xe83f45, 5, 100);
-light.position.copy(sphere.position).add(new THREE.Vector3(0, 10, 0));
-
-// light.position.set(0,10,4);
+light.position.set(50, sphere.position.y+10, 10);
+light.shadow.camera.position.copy(light.position)
 light.castShadow = true;
+// 设置光源的照射方向
+light.target = plane;
 scene.add(new THREE.AmbientLight(0xffffff));
 
 // 设置阴影属性
 light.shadow.mapSize.width = 512;
 light.shadow.mapSize.height = 512;
 light.shadow.camera.near = 0.5;
-light.shadow.camera.far = 500;
+light.shadow.camera.far = 100;
 
 
 
