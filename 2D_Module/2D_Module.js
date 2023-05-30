@@ -3,7 +3,7 @@
         var density = 0.5; // Initial density
         var cells = [];
 
-<<<<<<< HEAD
+
 //生成网格函数
 function createGrid() {
     for (var i = 0; i < 80; i++) {
@@ -15,24 +15,9 @@ function createGrid() {
             });
             grid.appendChild(cell);
             cells.push(cell);
-=======
-        // Function to create the grid of cells
-        function createGrid() {
-            for (var i = 0; i < 100; i++) {
-                for (var j = 0; j < 100; j++) {
-                    var cell = document.createElement("div");
-                    cell.className = "cell";
-                    cell.addEventListener("click", function () {
-                        toggleFire(this);
-                    });
-                    grid.appendChild(cell);
-                    cells.push(cell);
-                }
-            }
->>>>>>> 6ed9a1867fb4fd77462853274a82d17712554bf9
         }
-
-<<<<<<< HEAD
+    }
+}
 //切换火焰状态函数
 function toggleFire(cell) {
     if (cell.classList.contains("on-fire")) {//已经着火，点击就生长新的树啦
@@ -83,46 +68,6 @@ function spreadFire() {
             }
         });
     });
-=======
-        // Function to toggle the fire state of a cell
-        function toggleFire(cell) {
-            if (cell.classList.contains("on-fire")) {
-                cell.classList.remove("on-fire");
-            } else {
-                cell.classList.add("on-fire");
-                spreadFire();
-            }
-        }
-
-        // Function to spread the fire to neighboring cells
-        function spreadFire() {
-            var fireCells = Array.from(grid.getElementsByClassName("on-fire"));
-
-            var newFireCells = [];
-            fireCells.forEach(function (cell) {
-                var index = Array.prototype.indexOf.call(grid.children, cell);
-                var row = Math.floor(index / 100);
-                var col = index % 100;
-
-                var neighbors = [
-                    cells[getIndex(row - 1, col - 1)],
-                    cells[getIndex(row - 1, col)],
-                    cells[getIndex(row - 1, col + 1)],
-                    cells[getIndex(row, col - 1)],
-                    cells[getIndex(row, col + 1)],
-                    cells[getIndex(row + 1, col - 1)],
-                    cells[getIndex(row + 1, col)],
-                    cells[getIndex(row + 1, col + 1)]
-                ];
-
-                neighbors.forEach(function (neighbor) {
-                    if (neighbor && neighbor.classList.contains("cell") && Math.random() < 0.5) {
-                        neighbor.classList.add("on-fire");
-                        newFireCells.push(neighbor);
-                    }
-                });
-            });
->>>>>>> 6ed9a1867fb4fd77462853274a82d17712554bf9
 
             // Continue spreading the fire if new cells caught fire
             if (newFireCells.length > 0) {
@@ -132,7 +77,6 @@ function spreadFire() {
             }
         }
 
-<<<<<<< HEAD
 
 function getIndex(row, col) {
     //设置forest的范围
@@ -141,15 +85,6 @@ function getIndex(row, col) {
     }
     return row * 80 + col;
 }
-=======
-        // Function to get the index of a cell in the grid
-        function getIndex(row, col) {
-            if (row < 0 || row >= 100 || col < 0 || col >= 100) {
-                return -1;
-            }
-            return row * 100 + col;
-        }
->>>>>>> 6ed9a1867fb4fd77462853274a82d17712554bf9
 
         // Function to start the simulation
         function startSimulation() {
