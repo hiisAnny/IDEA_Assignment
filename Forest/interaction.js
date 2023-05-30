@@ -164,7 +164,7 @@ function removeMesh(fireTree) {
 
 }
 
-function checkSurroundingTrees(fireTree,plane) {
+function checkSurroundingTrees(plane) {
 
 
     // console.log(plane);

@@ -33,7 +33,7 @@ function init() {
     const forest = document.getElementById("forest");
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set(300, 600, 1200);
+    camera.position.set(300, 900, 1200);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
@@ -81,7 +81,7 @@ function init() {
     objects.push(plane);
 
     // 创建网格背景
-    const backgroundGeometry = new THREE.PlaneGeometry(1500, 2000);
+    const backgroundGeometry = new THREE.PlaneGeometry(1000, 1000);
     const backgroundMaterial = new THREE.MeshStandardMaterial({ color: 0xfff2f2 });
     const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
     backgroundGeometry.rotateX(- Math.PI / 2);
