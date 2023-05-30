@@ -4,50 +4,50 @@
         var cells = [];
 
 
-//生成网格函数
+//generate grid function
 function createGrid() {
     for (var i = 0; i < 80; i++) {
         for (var j = 0; j < 80; j++) {
             var cell = document.createElement("div");
             cell.className = "cell";
             cell.addEventListener("click", function () {
-                toggleFire(this); //点击就着火啦
+                toggleFire(this); //click for fire
             });
             grid.appendChild(cell);
             cells.push(cell);
         }
     }
 }
-//切换火焰状态函数
+//Toggle flame state function
 function toggleFire(cell) {
-    if (cell.classList.contains("on-fire")) {//已经着火，点击就生长新的树啦
+    if (cell.classList.contains("on-fire")) {
         cell.classList.remove("on-fire");
     } else {
-        cell.classList.add("on-fire");//加一个着火的单元格，让他着火
-        spreadFire();//火焰蔓延
+        cell.classList.add("on-fire");//Add a burning cell and set it on fire
+        spreadFire();//flame spread
     }
 }
 
-//火焰传播函数
+//flame spread function
 function spreadFire() {
-    //Array.from接受一个 类数组对象 作为参数，并返回一个由该对象的元素组成的新数组
+    //Array.from takes an array-like object as an argument and returns a new array consisting of the elements of that object
     var fireCells = Array.from(grid.getElementsByClassName("on-fire"));
 
     var newFireCells = [];
     fireCells.forEach(function (cell) {
         /**
-         * gridchildren是 类数组对象（Array-like object），
-         * 它是一种类似数组的对象，具有类似数组的特性，
-         * 具有数值键和 length 属性，但不具备数组的方法和功能
-         * 但并非严格的 JavaScript 数组。
+         * gridchildren is an Array-like object,
+         * It is an array-like object with array-like properties,
+         * Has numeric keys and a length property, but lacks the methods and functionality of arrays
+         * But not strictly JavaScript arrays.
          */
 
-        //找到着火的点的坐标行和列
-        var index = Array.prototype.indexOf.call(grid.children, cell); //返回cell首次出现的索引位置
+        //Find the coordinate row and column of the point on fire
+        var index = Array.prototype.indexOf.call(grid.children, cell); //Returns the index position of the first occurrence of the cell
         var row = Math.floor(index / 80);
         var col = index % 80;
 
-        //火源周围的八个格子
+        //Eight tiles around the fire source
         var neighbors = [
             cells[getIndex(row - 1, col - 1)],
             cells[getIndex(row - 1, col)],
@@ -59,10 +59,10 @@ function spreadFire() {
             cells[getIndex(row + 1, col + 1)]
         ];
 
-        //是否点燃的规则
+        //fire or not rule
         neighbors.forEach(function (neighbor) {
             if (neighbor && neighbor.classList.contains("cell") && Math.random() < 0.5) {
-                //没有超过边界，且周围是树，然后再根据一定的概率（1-0.5）决定是否将这些相邻格子标记为着火状态
+                //It does not exceed the boundary and is surrounded by trees, and then decides whether to mark these adjacent grids as on fire according to a certain probability (1-0.5)
                 neighbor.classList.add("on-fire");
                 newFireCells.push(neighbor);
             }
@@ -79,7 +79,7 @@ function spreadFire() {
 
 
 function getIndex(row, col) {
-    //设置forest的范围
+    //Set the scope of the forest
     if (row < 0 || row >= 80 || col < 0 || col >= 80) {
         return -1;
     }
