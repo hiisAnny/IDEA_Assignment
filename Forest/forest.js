@@ -6,7 +6,6 @@ let camera, scene, renderer, controls;
 let plane;
 let pointer, raycaster;
 
-//立方体们
 let container;
 let gridHelper;
 
