@@ -1,19 +1,19 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import {  isOnFire, checkFire, updateFire, updateFirePosition } from './interaction.js';
+import { increaseDensity } from './interaction.js';
 
 let camera, scene, renderer;
 let plane;
-let pointer, raycaster, isShiftDown = false;
+let pointer, raycaster;
 
 //立方体们
-let rollOverMesh, rollOverMaterial;
+let rollOverMesh, container;
 let cubeGeo, cubeMaterial;
 let gridHelper, controls;
 
 //需要进行射线相交检测的对象
 const objects = [];
-let density = [];
+
 
 //检测火源和树木的新增
 const newElement_toArray = new Event('newElement_toArray');
@@ -27,7 +27,7 @@ init();
 render();
 
 
-export { scene, objects, density, cubeGeo, cubeMaterial, pushWrapper};
+export { camera,scene, objects, cubeGeo, cubeMaterial, pushWrapper};
 
 function init() {
     const forest = document.getElementById("forest");
@@ -39,18 +39,30 @@ function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xe6fafc);
 
-    // 悬浮的树
-    const rollOverGeo = new THREE.BoxGeometry(50, 50, 50);
-    rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xb7ffb7, opacity: 0.5, transparent: true });
-    rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
-    rollOverMesh.position.set(0, 20, 0);
-    scene.add(rollOverMesh);
+        // 悬浮的树
+        const trunkShape = new THREE.CylinderGeometry(5, 10, 40, 32);
+        const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0xb7ffb7, opacity: 0.5, transparent: true });
+        const trunk = new THREE.Mesh(trunkShape, trunkMaterial);
+        trunk.position.set(0, 20, 0);
+       
+        const firstLeaf_shape = new THREE.ConeGeometry(20, 20, 32);
+        const firstLeaf_material = new THREE.MeshBasicMaterial({ color: 0x777a1f });
+        const firstLeaf = new THREE.Mesh(firstLeaf_shape, firstLeaf_material);
+        firstLeaf.position.set(0, 40, 0);
+    
+        const secondLeaf_shape = new THREE.ConeGeometry(15, 20, 32);
+        const secondLeaf_material = new THREE.MeshBasicMaterial({ color: 0x1b855c });
+        const secondLeaf = new THREE.Mesh(secondLeaf_shape, secondLeaf_material);
+        secondLeaf.position.set(0, 60, 0);
+        
+        container = new THREE.Group(); // 创建一个容器对象
+        container.add(trunk); // 将rollOverMesh添加到容器中
+        container.add(firstLeaf); // 将coneMesh添加到容器中
+        container.add(secondLeaf); // 将coneMesh添加到容器中
+        
+        scene.add(container); // 将容器对象添加到场景中
 
-    // cubes
-    const map = new THREE.TextureLoader().load('ground.png');
-    map.colorSpace = THREE.SRGBColorSpace;
-    cubeGeo = new THREE.BoxGeometry(50, 50, 50);
-    cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xfeb74c, map: map });
+   
 
     // grid
     gridHelper = new THREE.GridHelper(1000, 20);
@@ -89,17 +101,15 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     forest.appendChild(renderer.domElement);
-
+    for (let i = 0; i <100; i++){
+        increaseDensity();
+    }
     document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onDocumentKeyDown);
-    document.addEventListener('keyup', onDocumentKeyUp);
-    document.addEventListener('blur', no_one_is_planting_A_Tree);
+
 
     //新的树进density了
     document.addEventListener('newElement_toArray', () => {
-        // console.log('Element pushed to myArray!');
-        checkFire();
+        // checkFire();
     });
     
     // controls = new OrbitControls(camera, renderer.domElement);
@@ -107,11 +117,7 @@ function init() {
     window.addEventListener('resize', onWindowResize);
 
 }
-function no_one_is_planting_A_Tree() {
-    if (isOnFire) {
-        updateFirePosition();
-    }
-}
+
 function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -147,97 +153,29 @@ function onPointerMove(event) {
      * false：射线只会与指定的 objects 列表中的对象进行相交检测，不考虑其子对象
      * intersects 包含相交结果的数组，每个相交结果都是一个对象
      */
-    const intersects = raycaster.intersectObjects(objects, false);
+    const intersects = raycaster.intersectObjects(objects, true);
 
     /**
      * 在进行射线相交检测后，通过 intersect.point 可以获取相交点在 世界坐标系中 的位置
-     * 通过 copy 方法将相交点的坐标复制到 rollOverMesh.position 中
-     * add 方法将相交面的法线方向加到 rollOverMesh.position 上，从而得到更新后的 rollOverMesh 的位置。
+     * 通过 copy 方法将相交点的坐标复制到 container.position 中
+     * add 方法将相交面的法线方向加到 container.position 上，从而得到更新后的 container 的位置。
      */
     if (intersects.length > 0) {
-
         const intersect = intersects[0];
 
-        rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
-        rollOverMesh.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-
+        container.position.copy(intersect.point).add(intersect.face.normal);
+        container.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+        // console.log(container.position);
         render();
 
     }
 
 }
 
-function onPointerDown(event) {
 
-    pointer.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
-
-    raycaster.setFromCamera(pointer, camera);
-
-    const intersects = raycaster.intersectObjects(objects, false);
-
-    if (intersects.length > 0) {
-
-        const intersect = intersects[0];
-
-        // delete cube
-        if (isShiftDown) {
-            if (intersect.object !== plane) {
-                scene.remove(intersect.object);
-                objects.splice(objects.indexOf(intersect.object), 1);
-            }
-        }
-        // create cube
-        else {
-            const voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
-            voxel.position.copy(intersect.point).add(intersect.face.normal);
-            voxel.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-            scene.add(voxel);
-
-            objects.push(voxel);
-            pushWrapper(density, voxel);
-        }
-
-        render();
-    }
-}
-
-function onDocumentKeyDown(event) {
-
-    switch (event.keyCode) {
-
-        case 16: isShiftDown = true; break;
-
-    }
-
-}
-
-function onDocumentKeyUp(event) {
-
-    switch (event.keyCode) {
-
-        case 16: isShiftDown = false; break;
-
-    }
-
-}
 
 
 export function render() {
-    // 遍历 objects 数组，对每个立方体进行判断
-    // controls.update();
-    requestAnimationFrame(render);
-    // if (isOnFire) {requestAnimationFrame(updateFire);
-        // updateFire();
-            // updateFirePosition(); 
-            
-
-//  updateFirePosition();
-
-        // console.log("fdsfdsfsdfsd")
-       
-        // requestAnimationFrame(render);
-    // }
-    
 
     renderer.render(scene, camera);
 }
