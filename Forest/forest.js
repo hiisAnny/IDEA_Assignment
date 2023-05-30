@@ -12,7 +12,6 @@ let gridHelper;
 //需要进行射线相交检测的对象
 const objects = [];
 
-
 //检测火源和树木的新增
 const newElement_toArray = new Event('newElement_toArray');
 

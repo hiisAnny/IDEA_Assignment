@@ -163,7 +163,6 @@ function removeMesh(fireTree) {
 
 function checkSurroundingTrees(radius,x,y,z) {
     density.forEach(element => {
-
         const a = new THREE.Vector3(element.children[0].position.x, 0, element.children[0].position.z);
         const b = new THREE.Vector3(x, y, z);
         const d = a.distanceTo(b);
