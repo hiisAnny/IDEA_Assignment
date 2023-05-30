@@ -161,7 +161,6 @@ function removeMesh(fireTree) {
 
 }
 
-
 function checkSurroundingTrees(radius,x,y,z) {
     density.forEach(element => {
 

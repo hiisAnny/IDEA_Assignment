@@ -57,7 +57,6 @@ function init() {
     container.add(trunk); // 将rollOverMesh添加到容器中
     container.add(firstLeaf); // 将coneMesh添加到容器中
     container.add(secondLeaf); // 将coneMesh添加到容器中
-
     scene.add(container); // 将容器对象添加到场景中
 
     // grid
