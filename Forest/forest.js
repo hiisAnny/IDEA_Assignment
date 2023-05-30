@@ -60,7 +60,6 @@ function init() {
 
     scene.add(container); // 将容器对象添加到场景中
 
-
     // grid
     // gridHelper = new THREE.GridHelper(1000, 20);
     // gridHelper.material.color.set(0xe6fafc);

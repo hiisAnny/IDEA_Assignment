@@ -127,7 +127,6 @@ function changeColor(fireTree, currentIndex) {
 }
 
 function removeMesh(fireTree) {
-
     const index = burnTrees.indexOf(fireTree);
     if (index == -1) {
         fireTree.name = "burnTree";
