@@ -2,14 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { increaseDensity } from './interaction.js';
 
-let camera, scene, renderer;
+let camera, scene, renderer, controls;
 let plane;
 let pointer, raycaster;
 
 //立方体们
-let rollOverMesh, container;
-let cubeGeo, cubeMaterial;
-let gridHelper, controls;
+let container;
+let gridHelper;
 
 //需要进行射线相交检测的对象
 const objects = [];
@@ -25,49 +24,47 @@ const pushWrapper = (arr, element) => {
 
 init();
 render();
+export { scene, pushWrapper };
 
-
-export { camera,scene, objects, cubeGeo, cubeMaterial, pushWrapper};
 
 function init() {
     const forest = document.getElementById("forest");
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set(300, 900, 1200);
+    camera.position.set(300, 600, 1400);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xe6fafc);
 
-        // 悬浮的树
-        const trunkShape = new THREE.CylinderGeometry(5, 10, 40, 32);
-        const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0xb7ffb7, opacity: 0.5, transparent: true });
-        const trunk = new THREE.Mesh(trunkShape, trunkMaterial);
-        trunk.position.set(0, 20, 0);
-       
-        const firstLeaf_shape = new THREE.ConeGeometry(20, 20, 32);
-        const firstLeaf_material = new THREE.MeshBasicMaterial({ color: 0x777a1f });
-        const firstLeaf = new THREE.Mesh(firstLeaf_shape, firstLeaf_material);
-        firstLeaf.position.set(0, 40, 0);
-    
-        const secondLeaf_shape = new THREE.ConeGeometry(15, 20, 32);
-        const secondLeaf_material = new THREE.MeshBasicMaterial({ color: 0x1b855c });
-        const secondLeaf = new THREE.Mesh(secondLeaf_shape, secondLeaf_material);
-        secondLeaf.position.set(0, 60, 0);
-        
-        container = new THREE.Group(); // 创建一个容器对象
-        container.add(trunk); // 将rollOverMesh添加到容器中
-        container.add(firstLeaf); // 将coneMesh添加到容器中
-        container.add(secondLeaf); // 将coneMesh添加到容器中
-        
-        scene.add(container); // 将容器对象添加到场景中
+    // 悬浮的树
+    const trunkShape = new THREE.CylinderGeometry(5, 10, 40, 32);
+    const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x777a1f, opacity: 0.5, transparent: true });
+    const trunk = new THREE.Mesh(trunkShape, trunkMaterial);
+    trunk.position.set(0, 20, 0);
 
-   
+    const firstLeaf_shape = new THREE.ConeGeometry(20, 20, 32);
+    const firstLeaf_material = new THREE.MeshBasicMaterial({ color: 0xa7e5a7 });
+    const firstLeaf = new THREE.Mesh(firstLeaf_shape, firstLeaf_material);
+    firstLeaf.position.set(0, 40, 0);
+
+    const secondLeaf_shape = new THREE.ConeGeometry(15, 20, 32);
+    const secondLeaf_material = new THREE.MeshBasicMaterial({ color: 0x1b855c });
+    const secondLeaf = new THREE.Mesh(secondLeaf_shape, secondLeaf_material);
+    secondLeaf.position.set(0, 60, 0);
+
+    container = new THREE.Group(); // 创建一个容器对象
+    container.add(trunk); // 将rollOverMesh添加到容器中
+    container.add(firstLeaf); // 将coneMesh添加到容器中
+    container.add(secondLeaf); // 将coneMesh添加到容器中
+
+    scene.add(container); // 将容器对象添加到场景中
+
 
     // grid
-    gridHelper = new THREE.GridHelper(1000, 20);
-    gridHelper.material.color.set(0xe6fafc); 
-    scene.add(gridHelper);
+    // gridHelper = new THREE.GridHelper(1000, 20);
+    // gridHelper.material.color.set(0xe6fafc);
+    // scene.add(gridHelper);
 
     raycaster = new THREE.Raycaster();
     pointer = new THREE.Vector2();
@@ -88,6 +85,12 @@ function init() {
     backgroundPlane.position.set(0, -1, 0); // 将背景平面设置在网格的后面
     scene.add(backgroundPlane);
 
+    const cubeGeometry = new THREE.BoxGeometry(1000, 50, 1000);
+    const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xffe4d3 });
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(0,-30,0);
+    scene.add(cube);
+
     // 环境光
     const ambientLight = new THREE.AmbientLight(0x606060);
     scene.add(ambientLight);
@@ -101,7 +104,7 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     forest.appendChild(renderer.domElement);
-    for (let i = 0; i <100; i++){
+    for (let i = 0; i < 150; i++) {
         increaseDensity();
     }
     document.addEventListener('pointermove', onPointerMove);
@@ -109,10 +112,10 @@ function init() {
 
     //新的树进density了
     document.addEventListener('newElement_toArray', () => {
-        // checkFire();
+        // console.log("new tree create");
     });
-    
-    // controls = new OrbitControls(camera, renderer.domElement);
+
+    controls = new OrbitControls(camera, renderer.domElement);
 
     window.addEventListener('resize', onWindowResize);
 
@@ -172,11 +175,7 @@ function onPointerMove(event) {
 
 }
 
-
-
-
 export function render() {
-
     renderer.render(scene, camera);
 }
 

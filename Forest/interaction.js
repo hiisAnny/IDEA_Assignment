@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera, objects, cubeGeo, cubeMaterial } from './forest.js';
+import { scene } from './forest.js';
 import { render, pushWrapper } from './forest.js';
 let density = [];
 const burnTrees = [];
@@ -56,13 +56,13 @@ function addRandomTree() {
 
     // 悬浮的树
     const trunkShape = new THREE.CylinderGeometry(5, 10, 40, 32);
-    const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0xb7ffb7, opacity: 0.5, transparent: true });
+    const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x82571c, opacity: 0.5, transparent: true });
     const trunk = new THREE.Mesh(trunkShape, trunkMaterial);
     trunk.position.set(positionX, 20, positionZ);
     trunks.push(trunk);
 
     const firstLeaf_shape = new THREE.ConeGeometry(20, 20, 32);
-    const firstLeaf_material = new THREE.MeshBasicMaterial({ color: 0x777a1f });
+    const firstLeaf_material = new THREE.MeshBasicMaterial({ color: 0xa7e5a7 });
     const firstLeaf = new THREE.Mesh(firstLeaf_shape, firstLeaf_material);
     firstLeaf.position.set(positionX, 40, positionZ);
 
@@ -91,14 +91,14 @@ function createFire() {
     const firePosition = fireTree.children[0].position;
     // console.log(fireTree);
     const geometry = new THREE.SphereGeometry(10, 32, 16);
-    const material = new THREE.MeshBasicMaterial({ color: 0xd94948 });
+    const material = new THREE.MeshBasicMaterial({ color: 0xff8686 });
     const sphere = new THREE.Mesh(geometry, material);
     sphere.position.copy(firePosition);
     sphere.position.y += 60
     scene.add(sphere);
 
     changeColor(fireTree, 0);
-
+    scene.remove(sphere);
 }
 
 function changeColor(fireTree, currentIndex) {
@@ -108,14 +108,12 @@ function changeColor(fireTree, currentIndex) {
         density.splice(index, 1);
     }
 
-
-
     const delayTime = 1000; // 3秒
 
     // 延迟一定时间后执行颜色变化的操作
     setTimeout(() => {
         const mesh = fireTree.children[currentIndex];
-        mesh.material.color = new THREE.Color(0xd94948); // 设置红色
+        mesh.material.color = new THREE.Color(0xff8686); 
 
         render();
 
@@ -135,18 +133,18 @@ function removeMesh(fireTree) {
         fireTree.name = "burnTree";
         pushWrapper(burnTrees, fireTree);
         // console.log(burnTrees);
-                    // 创建辅助平面
-                    const planeGeometry = new THREE.PlaneGeometry(100, 100); // 根据实际需要调整平面的宽度和深度
-                    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff, side: THREE.DoubleSide, visible: false });
-                    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-                    planeGeometry.rotateX(- Math.PI / 2); //使其与场景的水平面相切，平行于网格的水平面
-                    
-                    plane.position.set(fireTree.children[0].position.x,0,fireTree.children[0].position.z)
-                    scene.add(plane);       
-                    checkSurroundingTrees(fireTree,plane)
+        // 创建辅助平面
+        const planeGeometry = new THREE.CircleGeometry( 50, 32 );; // 根据实际需要调整平面的宽度和深度
+        const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, visible: false });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        planeGeometry.rotateX(- Math.PI / 2); //使其与场景的水平面相切，平行于网格的水平面
+
+        plane.position.set(fireTree.children[0].position.x, 0, fireTree.children[0].position.z)
+        scene.add(plane);console.log(plane.position)
+        checkSurroundingTrees(50, plane.position.x, plane.position.y, plane.position.z);
     }
 
-    const delayTime = 1000; 
+    const delayTime = 1000;
 
     // 延迟一定时间后执行删除操作
     setTimeout(() => {
@@ -164,24 +162,15 @@ function removeMesh(fireTree) {
 
 }
 
-function checkSurroundingTrees(plane) {
 
-
-    // console.log(plane);
-    
-    const a = new THREE.Box3().setFromObject(plane);
+function checkSurroundingTrees(radius,x,y,z) {
     density.forEach(element => {
-        const b = new THREE.Vector3(element.children[0].position.x,0,element.children[0].position.z);
-        if (a.containsPoint(b)) {
-            // console.log("周围有活的树");
-            changeColor(element,0)
-        } else {
-            // console.log("没有")
-        }
-        
-      });
 
-
-
+        const a = new THREE.Vector3(element.children[0].position.x, 0, element.children[0].position.z);
+        const b = new THREE.Vector3(x, y, z);
+        const d = a.distanceTo(b);
+        if(d<=radius) changeColor(element,0)
+    });
 
 }
+
