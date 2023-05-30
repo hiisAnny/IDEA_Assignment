@@ -26,7 +26,6 @@ init();
 render();
 export { scene, pushWrapper };
 
-
 function init() {
     const forest = document.getElementById("forest");
 

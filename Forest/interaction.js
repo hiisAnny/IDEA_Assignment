@@ -171,4 +171,3 @@ function checkSurroundingTrees(radius,x,y,z) {
     });
 
 }
-
