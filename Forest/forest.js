@@ -1,7 +1,8 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { increaseDensity } from './interaction.js';
 
-let camera, scene, renderer, pointer, raycaster;
+let camera, scene, renderer, pointer, raycaster, controls;
 let plane, container, gridHelper;
 
 // Objects to be raycasted
@@ -104,7 +105,7 @@ function init() {
     for (let i = 0; i < 150; i++) {
         increaseDensity();
     }
-
+    controls = new OrbitControls(camera, renderer.domElement);
     document.addEventListener('pointermove', onPointerMove);
 
 
@@ -122,22 +123,22 @@ function onWindowResize() {
     const fWidth = forest.clientWidth
     const fHeight = forest.clientHeight 
 
-    camera.aspect = fWidth / fHeight
+    camera.aspect = fWidth / fHeight;
     renderer.setSize(fWidth, fHeight);
-    camera.updateProjectionMatrix()
+    camera.updateProjectionMatrix();
     render()
 }
 
 
-
+/**
+ * Mouse (x, y) -> Normalized Device Coordinates (NDC)
+ * Normalized Device Coordinates is a 2D coordinate system with a range of [-1, 1],
+ * where -1 represents the left/bottom of the screen, and 1 represents the right/top of the screen.
+ * Used for consistent calculations and representation across different resolutions and device sizes.
+ * @param {*} event 
+ */
 function onPointerMove(event) {
-    /** 
-     * 鼠标（x,y) -> 标准化设备坐标（Normalized Device Coordinates，NDC）
-     * 标准化设备坐标是一个范围为 [-1, 1] 的二维坐标系统，-1 表示屏幕最左侧/底部，1 表示屏幕最右侧/顶部
-     * 
-     * 在不同分辨率和尺寸的设备上进行统一计算和表示
-     */
-    //将鼠标指针的屏幕坐标转换为相机坐标系中的坐标
+    // Convert the screen coordinates of the mouse pointer to coordinates in camera space
     const ndcX = (event.clientX / window.innerWidth) * 2 - 1;
     const ndcY = - (event.clientY / window.innerHeight) * 2 + 1;
     pointer.set(ndcX, ndcY);

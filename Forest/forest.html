@@ -11,20 +11,25 @@
 <body>
   <div class="container">
     <div class="grid-header">
-      <h1> forest</h1>
+      <h1>Forest</h1>
     </div>
     <div class="grid-text">
-      <h3> This is the description of the work</h1>
+      <h3>Design Description</h3>
+      This project is an emergent design based on the seasoning bushfire happening in Australian eucalyptus forests. It
+      visualizes the rapid and wide spread of bushfire and the forest’s reseed and gradual recovery after fire through
+      an automatic cell machine model. The visual result is variable and emerging with the density of forest is
+      controlled by users.
     </div>
     <div class="grid-content">
-      <h2> This is a svg</h2>
       <div id="forest"> </div>
     </div>
     <div class="grid-control">
       <h4> This is the control bar</h1>
-        <button id="startSimulation">开始</button>
-        <button id="increaseDensity">增加密度</button>
-        <button id="decreaseDensity">减少密度</button>
+        <div class="buttonLayout">
+          <button class="interactiveButton" id="startSimulation">Create fire</button>
+          <button class="interactiveButton" id="increaseDensity">Increase Density</button>
+          <button class="interactiveButton" id="decreaseDensity">Decrease Density</button>
+        </div>
         <br><br />
         <br><br />
         <label for="generate-color-button">Click to fill the shape with colors:</label>
