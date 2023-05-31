@@ -1,13 +1,11 @@
 import * as THREE from 'three';
-import { scene } from './forest.js';
-import { render, pushWrapper } from './forest.js';
+import { scene,render, pushWrapper } from './forest.js';
+
 let density = [];
 const burnTrees = [];
-let fire, fireRadius, isOnFire;
-const fireAreas = [];
 const trunks = [];
 
-const startButton = document.getElementById('startButton');
+const startButton = document.getElementById('startSimulation');
 startButton.addEventListener('click', startSimulation);
 
 const increaseButton = document.getElementById('increaseDensity');
@@ -16,11 +14,10 @@ increaseButton.addEventListener('click', increaseDensity);
 const decreaseButton = document.getElementById('decreaseDensity');
 decreaseButton.addEventListener('click', decreaseDensity);
 
-
-export { isOnFire };
 function getRandomPosition(min, max) {
     return Math.random() * (max - min) + min
 }
+
 function getRandomElement(array) {
     const randomIndex = Math.floor(Math.random() * array.length);
     return array[randomIndex];
@@ -48,48 +45,51 @@ function decreaseDensity() {
     }
 }
 
-
+/**
+ * The trunk is a distorted cylinder with
+ * a bottom base radius of 10, a top base radius of 5, and a height of 40.
+ * The leaves are represented by a cylinder shape.
+ */
 function addRandomTree() {
 
     const positionX = getRandomPosition(-425, 425);
     const positionZ = getRandomPosition(-425, 425);
 
-    // 悬浮的树
     const trunkShape = new THREE.CylinderGeometry(5, 10, 40, 32);
     const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x82571c, opacity: 0.5, transparent: true });
     const trunk = new THREE.Mesh(trunkShape, trunkMaterial);
     trunk.position.set(positionX, 20, positionZ);
     trunks.push(trunk);
 
+    //ConeGeometry with radius-20, height-20, radialSegments-32
     const firstLeaf_shape = new THREE.ConeGeometry(20, 20, 32);
     const firstLeaf_material = new THREE.MeshBasicMaterial({ color: 0xa7e5a7 });
     const firstLeaf = new THREE.Mesh(firstLeaf_shape, firstLeaf_material);
     firstLeaf.position.set(positionX, 40, positionZ);
 
+    //ConeGeometry with radius-15, height-20, radialSegments-32
     const secondLeaf_shape = new THREE.ConeGeometry(15, 20, 32);
     const secondLeaf_material = new THREE.MeshBasicMaterial({ color: 0x1b855c });
     const secondLeaf = new THREE.Mesh(secondLeaf_shape, secondLeaf_material);
     secondLeaf.position.set(positionX, 60, positionZ);
 
-    const container = new THREE.Object3D(); // 创建一个容器对象
-    container.add(trunk); // 将rollOverMesh添加到容器中
-    container.add(firstLeaf); // 将coneMesh添加到容器中
-    container.add(secondLeaf); // 将coneMesh添加到容器中
+    // create a container to group trunk and leaves
+    const container = new THREE.Object3D(); 
+    container.add(trunk); 
+    container.add(firstLeaf);
+    container.add(secondLeaf); 
 
     container.name = "alive tree";
-    // 将立方体添加到场景中
     scene.add(container);
-    pushWrapper(density, container);
+    pushWrapper(density, container);//For testing - if it do add it to the scene
 }
 /**
- * 斜边是100，直边距离是50，球的半径是16
- * 火苗边缘到地面的距离是 50-16 = 34
+ * create a fire, represented by a pink sphere shape
  */
 function createFire() {
     // console.log(getRandomElement(density).children[0].position.y);
     const fireTree = getRandomElement(density);
     const firePosition = fireTree.children[0].position;
-    // console.log(fireTree);
     const geometry = new THREE.SphereGeometry(10, 32, 16);
     const material = new THREE.MeshBasicMaterial({ color: 0xff8686 });
     const sphere = new THREE.Mesh(geometry, material);
@@ -101,6 +101,12 @@ function createFire() {
     scene.remove(sphere);
 }
 
+/**
+ * The burning tree will gradually ignite, starting from the trunk and moving up towards the leaves. 
+ * Once fully engulfed in flames, it will begin to dissipate, starting from the leaves. (removeMesh function)
+ * @param {*} fireTree 
+ * @param {*} currentIndex 
+ */
 function changeColor(fireTree, currentIndex) {
     //删掉这棵树
     const index = density.indexOf(fireTree);
@@ -126,26 +132,31 @@ function changeColor(fireTree, currentIndex) {
 
 }
 
+/**
+ * Once fully engulfed in flames, it will begin to dissipate, starting from the leaves.
+ * Meanwhile check the surrondingTrees if it is influenced by flame.
+ * @param {*} fireTree 
+ */
 function removeMesh(fireTree) {
     const index = burnTrees.indexOf(fireTree);
     if (index == -1) {
         fireTree.name = "burnTree";
         pushWrapper(burnTrees, fireTree);
-        // console.log(burnTrees);
-        // 创建辅助平面
-        const planeGeometry = new THREE.CircleGeometry( 50, 32 );; // 根据实际需要调整平面的宽度和深度
+
+        // Assist plane represent the fire areas
+        const planeGeometry = new THREE.CircleGeometry( 50, 32 );; 
         const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, visible: false });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        planeGeometry.rotateX(- Math.PI / 2); //使其与场景的水平面相切，平行于网格的水平面
-
+        planeGeometry.rotateX(- Math.PI / 2);
         plane.position.set(fireTree.children[0].position.x, 0, fireTree.children[0].position.z)
-        scene.add(plane);console.log(plane.position)
+        scene.add(plane);
+        // console.log(plane.position)
+        
         checkSurroundingTrees(50, plane.position.x, plane.position.y, plane.position.z);
     }
 
     const delayTime = 1000;
 
-    // 延迟一定时间后执行删除操作
     setTimeout(() => {
 
         fireTree.children.pop();
@@ -161,6 +172,15 @@ function removeMesh(fireTree) {
 
 }
 
+/**
+ * The program determines if the surrounding trees are within the range of a fire by 
+ * calculating the distances between each tree and the burning tree. 
+ * If a tree is within a specified fire range, it is considered to be affected by the fire.
+ * @param {*} radius 
+ * @param {*} x 
+ * @param {*} y 
+ * @param {*} z 
+ */
 function checkSurroundingTrees(radius,x,y,z) {
     density.forEach(element => {
         const a = new THREE.Vector3(element.children[0].position.x, 0, element.children[0].position.z);

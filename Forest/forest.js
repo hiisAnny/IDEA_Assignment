@@ -1,40 +1,34 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { increaseDensity } from './interaction.js';
 
-let camera, scene, renderer, controls;
-let plane;
-let pointer, raycaster;
+let camera, scene, renderer, pointer, raycaster;
+let plane, container, gridHelper;
 
-let container;
-let gridHelper;
-
-//需要进行射线相交检测的对象
+// Objects to be raycasted
 const objects = [];
 
-//检测火源和树木的新增
-const newElement_toArray = new Event('newElement_toArray');
 
+// For testing - Event to notify new element added to the array, to increse the tree density
+const newElement_toArray = new Event('newElement_toArray');
 const pushWrapper = (arr, element) => {
     arr.push(element);
     document.dispatchEvent(newElement_toArray);
 };
 
-init();
-render();
 export { scene, pushWrapper };
 
 function init() {
     const forest = document.getElementById("forest");
-
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+    const fWidth = forest.clientWidth
+    const fHeight = forest.clientHeight
+    camera = new THREE.PerspectiveCamera(45, fWidth / fHeight, 1, 10000);
     camera.position.set(300, 600, 1400);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xe6fafc);
 
-    // 悬浮的树
+    // For testing - Basic Tree with mouse moving
     const trunkShape = new THREE.CylinderGeometry(5, 10, 40, 32);
     const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x777a1f, opacity: 0.5, transparent: true });
     const trunk = new THREE.Mesh(trunkShape, trunkMaterial);
@@ -50,13 +44,13 @@ function init() {
     const secondLeaf = new THREE.Mesh(secondLeaf_shape, secondLeaf_material);
     secondLeaf.position.set(0, 60, 0);
 
-    container = new THREE.Group(); // 创建一个容器对象
-    container.add(trunk); // 将rollOverMesh添加到容器中
-    container.add(firstLeaf); // 将coneMesh添加到容器中
-    container.add(secondLeaf); // 将coneMesh添加到容器中
-    scene.add(container); // 将容器对象添加到场景中
+    container = new THREE.Group(); // Create a container object
+    container.add(trunk); // Add trunk to the container
+    container.add(firstLeaf); // Add first leaf to the container
+    container.add(secondLeaf); // Add second leaf to the container
+    scene.add(container); // Add the container object to the scene
 
-    // grid
+    // For testing - grid help identify the tree or fire position
     // gridHelper = new THREE.GridHelper(1000, 20);
     // gridHelper.material.color.set(0xe6fafc);
     // scene.add(gridHelper);
@@ -64,33 +58,38 @@ function init() {
     raycaster = new THREE.Raycaster();
     pointer = new THREE.Vector2();
 
-    //辅助平面对象平面来判断交点是哪，判断树建在哪里
+    /**
+     * This is a assist plane object plane
+     * The raycaster passes through the plane to determine the intersection point
+     * which corresponds to the position of the mouse。
+     * Make it tangent to the horizontal plane of the scene, parallel to the horizontal plane of the grid.
+     */
     const geometry = new THREE.PlaneGeometry(1000, 1000);
-    geometry.rotateX(- Math.PI / 2); //使其与场景的水平面相切，平行于网格的水平面
+    geometry.rotateX(- Math.PI / 2);
     plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ visible: false }));
     scene.add(plane);
 
     objects.push(plane);
 
-    // 创建网格背景
+    // Create a plane background for grid which is the ground surface
     const backgroundGeometry = new THREE.PlaneGeometry(1000, 1000);
     const backgroundMaterial = new THREE.MeshStandardMaterial({ color: 0xfff2f2 });
     const backgroundPlane = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
     backgroundGeometry.rotateX(- Math.PI / 2);
-    backgroundPlane.position.set(0, -1, 0); // 将背景平面设置在网格的后面
+    backgroundPlane.position.set(0, -1, 0); 
     scene.add(backgroundPlane);
 
+    //Here is the ground with 50 deep
     const cubeGeometry = new THREE.BoxGeometry(1000, 50, 1000);
     const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xffe4d3 });
     const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.position.set(0,-30,0);
     scene.add(cube);
 
-    // 环境光
+    
     const ambientLight = new THREE.AmbientLight(0x606060);
     scene.add(ambientLight);
 
-    // 定向光源
     const directionalLight = new THREE.DirectionalLight(0xffffff);
     directionalLight.position.set(1, 0.75, 0.5).normalize();
     scene.add(directionalLight);
@@ -98,33 +97,38 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+
     forest.appendChild(renderer.domElement);
+    
+    //create some random trees on our ground
     for (let i = 0; i < 150; i++) {
         increaseDensity();
     }
+
     document.addEventListener('pointermove', onPointerMove);
 
 
-    //新的树进density了
+    //new tree add into density array
     document.addEventListener('newElement_toArray', () => {
         // console.log("new tree create");
     });
-
-    controls = new OrbitControls(camera, renderer.domElement);
 
     window.addEventListener('resize', onWindowResize);
 
 }
 
 function onWindowResize() {
+    const forest = document.getElementById("forest");
+    const fWidth = forest.clientWidth
+    const fHeight = forest.clientHeight 
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    render();
-
+    camera.aspect = fWidth / fHeight
+    renderer.setSize(fWidth, fHeight);
+    camera.updateProjectionMatrix()
+    render()
 }
+
+
 
 function onPointerMove(event) {
     /** 
@@ -174,3 +178,5 @@ export function render() {
     renderer.render(scene, camera);
 }
 
+init();
+render();
