@@ -144,24 +144,24 @@ function onPointerMove(event) {
     pointer.set(ndcX, ndcY);
 
     /**
-     * NDC -> 相机坐标系中的 坐标(x,y,z)
-     * 通过将raycaster的起点和方向更新
-     * 更新为 起点将是相机的位置，而方向将是从相机位置出发
+     * NDC -> Coordinates (x, y, z) in camera space
+     * Update the starting point and direction of the raycaster to be the camera position
+     * and the direction from the camera position.
      */
     raycaster.setFromCamera(pointer, camera);
 
     /**
-     * Raycaster 对象用于进行射线与场景中物体的相交检测。
-     * 通过设置射线的起点（相机的位置）和方向，raycaster 可以发射射线，返回与物体相交的结果
-     * false：射线只会与指定的 objects 列表中的对象进行相交检测，不考虑其子对象
-     * intersects 包含相交结果的数组，每个相交结果都是一个对象
+     * The Raycaster object is used for raycasting, which is the process of finding intersections between a ray and objects in the scene.
+     * By setting the starting point (camera position) and direction of the ray, the raycaster can cast a ray and return the intersections with objects.
+     * False: Only consider objects in the specified objects list for intersection checks, ignoring their children. True on the other side.
+     * intersects is an array containing the intersection results, where each result is an object.
      */
     const intersects = raycaster.intersectObjects(objects, true);
 
     /**
-     * 在进行射线相交检测后，通过 intersect.point 可以获取相交点在 世界坐标系中 的位置
-     * 通过 copy 方法将相交点的坐标复制到 container.position 中
-     * add 方法将相交面的法线方向加到 container.position 上，从而得到更新后的 container 的位置。
+     * After performing raycasting, ‘intersect.point’ provides the position of the intersection point in world coordinates.
+     * Copy the coordinates of the intersection point to ‘container.position’ using the copy method.
+     * Add the normal direction of the intersected face to ‘container.position’ to update the position of container.
      */
     if (intersects.length > 0) {
         const intersect = intersects[0];

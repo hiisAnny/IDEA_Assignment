@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene,render, pushWrapper } from './forest.js';
+import { scene, render, pushWrapper } from './forest.js';
 
 let density = [];
 const burnTrees = [];
@@ -23,6 +23,9 @@ function getRandomElement(array) {
     return array[randomIndex];
 }
 
+/**
+ * Start create fire if there are tree on the ground
+ */
 function startSimulation() {
     if (density.length > 0) {
         console.log("has tree?");
@@ -74,15 +77,16 @@ function addRandomTree() {
     secondLeaf.position.set(positionX, 60, positionZ);
 
     // create a container to group trunk and leaves
-    const container = new THREE.Object3D(); 
-    container.add(trunk); 
+    const container = new THREE.Object3D();
+    container.add(trunk);
     container.add(firstLeaf);
-    container.add(secondLeaf); 
+    container.add(secondLeaf);
 
     container.name = "alive tree";
     scene.add(container);
     pushWrapper(density, container);//For testing - if it do add it to the scene
 }
+
 /**
  * create a fire, represented by a pink sphere shape
  */
@@ -98,6 +102,7 @@ function createFire() {
     scene.add(sphere);
 
     changeColor(fireTree, 0);
+
     scene.remove(sphere);
 }
 
@@ -108,22 +113,21 @@ function createFire() {
  * @param {*} currentIndex 
  */
 function changeColor(fireTree, currentIndex) {
-    //删掉这棵树
     const index = density.indexOf(fireTree);
     if (index !== -1) {
         density.splice(index, 1);
     }
 
-    const delayTime = 1000; // 3秒
+    //Delay to achieve a gradient effect
+    const delayTime = 1000;
 
-    // 延迟一定时间后执行颜色变化的操作
     setTimeout(() => {
         const mesh = fireTree.children[currentIndex];
-        mesh.material.color = new THREE.Color(0xff8686); 
+        mesh.material.color = new THREE.Color(0xff8686);
 
         render();
 
-        currentIndex++; // 增加索引
+        currentIndex++;
 
         if (currentIndex < fireTree.children.length) {
             changeColor(fireTree, currentIndex);
@@ -144,14 +148,14 @@ function removeMesh(fireTree) {
         pushWrapper(burnTrees, fireTree);
 
         // Assist plane represent the fire areas
-        const planeGeometry = new THREE.CircleGeometry( 50, 32 );; 
+        const planeGeometry = new THREE.CircleGeometry(50, 32);;
         const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, visible: false });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         planeGeometry.rotateX(- Math.PI / 2);
         plane.position.set(fireTree.children[0].position.x, 0, fireTree.children[0].position.z)
         scene.add(plane);
         // console.log(plane.position)
-        
+
         checkSurroundingTrees(50, plane.position.x, plane.position.y, plane.position.z);
     }
 
@@ -181,12 +185,12 @@ function removeMesh(fireTree) {
  * @param {*} y 
  * @param {*} z 
  */
-function checkSurroundingTrees(radius,x,y,z) {
+function checkSurroundingTrees(radius, x, y, z) {
     density.forEach(element => {
         const a = new THREE.Vector3(element.children[0].position.x, 0, element.children[0].position.z);
         const b = new THREE.Vector3(x, y, z);
         const d = a.distanceTo(b);
-        if(d<=radius) changeColor(element,0)
+        if (d <= radius) changeColor(element, 0)
     });
 
 }
