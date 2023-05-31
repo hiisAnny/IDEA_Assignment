@@ -97,7 +97,7 @@ function init() {
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(fWidth, fHeight);
 
     forest.appendChild(renderer.domElement);
     
@@ -123,9 +123,9 @@ function onWindowResize() {
     const fWidth = forest.clientWidth
     const fHeight = forest.clientHeight 
 
-    camera.aspect = fWidth / fHeight;
+    camera.aspect = fWidth / fHeight
     renderer.setSize(fWidth, fHeight);
-    camera.updateProjectionMatrix();
+    camera.updateProjectionMatrix()
     render()
 }
 

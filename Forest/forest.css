@@ -33,7 +33,9 @@
   justify-content: flex-start;
   align-items: center;
 }
-
+.description{
+  text-align: center;
+}
 .grid-content {
   grid-area: grid-svg;
 }
