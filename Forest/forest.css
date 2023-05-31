@@ -6,7 +6,7 @@
 .container {
   display: grid;
   grid-template-columns: 1.7fr 0.1fr 2.6fr 1fr;
-  grid-template-rows: 0.5fr 0.5fr 1fr 2fr;
+  grid-template-rows: 0.2fr 0.5fr 0.7fr 2.3fr;
   gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas:
@@ -24,7 +24,41 @@
   justify-content: center;
   align-items: center;
 }
+.grid-nav {
+  grid-area: grid-nav;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
+.grid-control {
+  grid-area: grid-control;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.buttonLayout {
+  grid-area: button;
+  display: flex;
+  /* flex: 1; */
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.interactiveButton {
+  padding: 6px;
+  font-size: 15px;
+  border-radius: 12px;
+  background-color: white;
+  color: #ffc6a6;
+  border: 2px solid #a0e0a2;
+}
 .grid-text {
   grid-area: grid-text;
   border: 1px solid black;
@@ -33,9 +67,11 @@
   justify-content: flex-start;
   align-items: center;
 }
-.description{
+
+.description {
   text-align: center;
 }
+
 .grid-content {
   grid-area: grid-svg;
 }
@@ -54,60 +90,30 @@ svg {
   width: 100%;
   height: 100%;
 }
-.grid-control {
-  grid-area: grid-control;
-  border: 1px solid black;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.buttonLayout {
-  grid-area: button;
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
 
-.interactiveButton {
-  padding: 10px;
-  /* 设置按钮的内边距 */
-  font-size: 15px;
-  border-radius: 12px;
-  background-color: white;
-  color: #ffc6a6;
-  border: 2px solid #a0e0a2;
-  /* Green */
-}
 
 .interactiveButton:hover {
   background-color: #a0e0a2;
-  /* Green */
   color: white;
 }
 
 
 
-.grid-nav {
-  grid-area: grid-nav;
-  border: 1px solid black
-}
+
 
 @media screen and (max-width: 768px) {
   .container {
     display: grid;
     grid-template-columns: auto;
-    grid-template-rows: 0.5fr 0.5fr 0.5fr 2fr 0.5fr;
+    grid-template-rows: 0.2fr 0.3fr 0.3fr 0.8fr 2fr;
     gap: 0px 0px;
     grid-auto-flow: row;
     grid-template-areas:
       "grid-header"
       "grid-nav"
       "grid-control"
-      "grid-svg"
-      "grid-text";
+      "grid-text"
+      "grid-svg";
   }
 
   #forest {
