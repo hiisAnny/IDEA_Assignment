@@ -28,10 +28,10 @@ function getRandomElement(array) {
  */
 function startSimulation() {
     if (density.length > 0) {
-        console.log("has tree?");
+        console.log("There are trees on the ground");
         createFire();
         render();
-    } else console.log("No trees anymore!")
+    } else console.log("No trees on the ground and fire is no use anymore!")
 }
 
 export function increaseDensity() {
@@ -84,6 +84,7 @@ function addRandomTree() {
 
     container.name = "alive tree";
     scene.add(container);
+
     pushWrapper(density, container);//For testing - if it do add it to the scene
 }
 

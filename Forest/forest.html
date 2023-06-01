@@ -9,9 +9,12 @@
 </head>
 
 <body>
+
+  <img class="banner" src="Banner.png" alt="banner">
+
   <div class="container">
     <div class="grid-header">
-      <h1>Forest</h1>
+      <h1>Flame and Renewal: A Dynamic Exploration of Eucalyptus Forests</h1>
     </div>
 
     <div class="grid-nav">
@@ -23,50 +26,57 @@
     </div>
 
     <div class="grid-control">
-      <h4> Control Bar</h1>
-        <p class="description">Color indications and tree status:<br />
-          Tree in red: on fire
-          Tree in green: growing and not on fire
-        </p>
-        <div class="buttonLayout">
-          <button title="You could create more than once" class="interactiveButton" id="startSimulation">Create fire</button>
-          <button class="interactiveButton" id="increaseDensity">Increase Density</button>
-          <button class="interactiveButton" id="decreaseDensity">Decrease Density</button>
-        </div>
+      <h4> Control Bar</h4>
+      <p class="description">Color indications and tree status:<br />
+        Tree in red: on fire
+        Tree in green: growing and not on fire
+      </p>
+      <div class="buttonLayout">
+        <button title="You could create more than once" class="interactiveButton" id="startSimulation">Create
+          fire</button>
+        <button class="interactiveButton" id="increaseDensity">Increase Density</button>
+        <button class="interactiveButton" id="decreaseDensity">Decrease Density</button>
+      </div>
     </div>
 
     <div class="grid-text">
       <h3>Design Description</h3>
-    
+
       <p class="description">
         This project is an emergent design based on the seasoning bushfire happening in Australian eucalyptus
-        forests. It visualizes the rapid and wide spread of bushfire and the forest's reseed and gradual recovery after fire
-        through an automatic cell machine model. The visual result is variable and emerging with the density of forest is
+        forests. It visualizes the rapid and wide spread of bushfire and the forest's reseed and gradual recovery after
+        fire
+        through an automatic cell machine model. The visual result is variable and emerging with the density of forest
+        is
         controlled by users.
       </p>
-    
+
       <p>Detailed rules:</p>
       <ol type="i">
-        <li>Tree Growing: An existing growing tree will continue growing if there are either blank land or other growing trees within its 50*50 relative range.</li>
-        <li>Tree Turned to Burning Status: A growing tree will switch to burning status when there are over 2 burning trees within its 50*50 relative range. While a burning tree will continue burning until it disappears under the same situation.</li>
-        <li>Breed a new tree: When there’s no burning trees within 50*50 relative range of a growing tree, a new tree will be bred on an empty spot within this range.</li>
-        <li>Reseed of a tree: A tree can be reseed on an empty spot when there’s no burning tree within its 50*50 relative range.</li>
+        <li>Tree Growing: An existing growing tree will continue growing if there are either blank land or other growing
+          trees within its 50*50 relative range.</li>
+        <li>Tree Turned to Burning Status: A growing tree will switch to burning status when there are over 2 burning
+          trees within its 50*50 relative range. While a burning tree will continue burning until it disappears under
+          the same situation.</li>
+        <li>Breed a new tree: When there’s no burning trees within 50*50 relative range of a growing tree, a new tree
+          will be bred on an empty spot within this range.</li>
+        <li>Reseed of a tree: A tree can be reseed on an empty spot when there’s no burning tree within its 50*50
+          relative range.</li>
       </ol>
     </div>
-    
+
 
     <div class="grid-content">
       <div id="forest"> </div>
+
     </div>
-
-
-
   </div>
+  < img class="ending" src="ending.png" alt="ending">
 
 
-  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
-  <script type="importmap">
+    <script type="importmap">
       {
         "imports": {
           "three": "https://unpkg.com/three@v0.152.2/build/three.module.js",
@@ -74,8 +84,8 @@
         }
       }
     </script>
-  <script type="module" src="forest.js"></script>
-  <script type="module" src="interaction.js"></script>
+    <script type="module" src="forest.js"></script>
+    <script type="module" src="interaction.js"></script>
 </body>
 
 </html>
